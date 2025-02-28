@@ -12,7 +12,7 @@ export class AxiosService {
   public axiosCreateInstance(baseUrl: string, serviceName?: string): ReturnType<typeof axios.create> {
     let requestGatewayToken = '';
     if (serviceName) {
-      requestGatewayToken = sign({ id: serviceName }, `${config.auth.jwtToken}`);
+      requestGatewayToken = sign({ id: serviceName }, `${config.auth.gatewayToken}`);
     }
     const instance: ReturnType<typeof axios.create> = axios.create({
       baseURL: baseUrl,

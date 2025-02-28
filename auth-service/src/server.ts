@@ -13,7 +13,7 @@ import http from 'http';
 import { Channel } from 'amqplib';
 import compression from 'compression';
 
-import { elasticSearch } from './elasticsearch';
+import { checkConnection, createIndex } from './elasticsearch';
 import { closeConnection, createConnection } from './queues/connection';
 import { appRoutes } from './routes';
 
@@ -67,7 +67,8 @@ function standardMiddleware(app: Application): void {
 }
 
 function startElasticSearch(): void {
-  elasticSearch.checkConnection();
+  checkConnection();
+  createIndex('gigs');
 }
 async function startQueues(): Promise<void> {
   log.info('Starting queues...');
