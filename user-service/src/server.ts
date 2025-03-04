@@ -18,7 +18,7 @@ import { appRoutes } from './routes';
 
 const SERVER_PORT = 4003;
 
-const log: Logger = WinstonLogger(`${config.elasticSearch.url}`, 'authServer', 'debug');
+const log: Logger = WinstonLogger(`${config.elasticSearch.url}`, 'AuthServer', 'debug');
 export let channel: Channel;
 
 export async function start(app: Application): Promise<void> {
