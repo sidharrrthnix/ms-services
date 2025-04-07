@@ -14,8 +14,9 @@ import http from 'http';
 
 import { databaseConnection, disconnectDatabase } from './database';
 import { checkConnection } from './elasticsearch';
+import { createConnection } from './queues/connection';
+import { consumeBuyerDirectMessage } from './queues/user.consumer';
 import { appRoutes } from './routes';
-
 const SERVER_PORT = 4003;
 
 const log: Logger = WinstonLogger(`${config.elasticSearch.url}`, 'AuthServer', 'debug');
@@ -69,7 +70,11 @@ function standardMiddleware(app: Application): void {
 function startElasticSearch(): void {
   checkConnection();
 }
-async function startQueues(): Promise<void> {}
+async function startQueues(): Promise<void> {
+  log.info('Starting queues...');
+  channel = (await createConnection()) as Channel;
+  await consumeBuyerDirectMessage(channel);
+}
 
 function authErrorHandler(app: Application): void {
   app.use((error: IErrorResponse, _req: Request, res: Response, next: NextFunction) => {

@@ -3,7 +3,15 @@ import { config } from '@auth-service/config';
 import { AuthModel } from '@auth-service/models/auth.schema';
 import { publishDirectMessage } from '@auth-service/queues/auth.producer';
 import { channel } from '@auth-service/server';
-import { firstLetterUppercase, IAuthBuyerMessageDetails, IAuthDocument, lowerCase, WinstonLogger } from '@sidharrrthnix/ms-shared-package';
+import {
+  Exchange,
+  firstLetterUppercase,
+  IAuthBuyerMessageDetails,
+  IAuthDocument,
+  lowerCase,
+  RoutingKey,
+  WinstonLogger
+} from '@sidharrrthnix/ms-shared-package';
 import { sign } from 'jsonwebtoken';
 import { Op } from 'sequelize';
 import { Logger } from 'winston';
@@ -50,8 +58,8 @@ export async function createAuthUser(data: IAuthDocument): Promise<IAuthDocument
 
     await publishDirectMessage(
       channel,
-      'fs-buyer-update',
-      'user-buyer',
+      Exchange.BuyerUpdate,
+      RoutingKey.BuyerUpdate,
       JSON.stringify(messageDetails),
       'Buyer details sent to buyer service.'
     );

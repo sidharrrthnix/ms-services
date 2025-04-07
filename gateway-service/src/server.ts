@@ -16,6 +16,8 @@ import { config } from './config';
 import { elasticSearch } from './elasticsearch';
 import { appRoutes } from './routes';
 import { axiosAuthInstance } from './services/api/auth.service';
+import { axiosBuyerInstance } from './services/api/buyer.service';
+import { axiosSellerInstance } from './services/api/seller.service';
 
 export let socketIO: Server;
 
@@ -68,6 +70,8 @@ export class GatewayServer {
     app.use((req: Request, _res: Response, next: NextFunction) => {
       if (req.session?.jwt) {
         axiosAuthInstance.defaults.headers['Authorization'] = `Bearer ${req.session?.jwt}`;
+        axiosBuyerInstance.defaults.headers['Authorization'] = `Bearer ${req.session?.jwt}`;
+        axiosSellerInstance.defaults.headers['Authorization'] = `Bearer ${req.session?.jwt}`;
       }
       next();
     });

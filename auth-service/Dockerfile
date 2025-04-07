@@ -34,7 +34,7 @@ COPY --from=builder /app/build ./build
 ENV NODE_ENV=production
 
 # Expose application port
-EXPOSE 4000
+EXPOSE 4002
 
 # Start the application using PM2
 CMD ["pm2-runtime", "start", "build/src/app.js", "--attach"]

@@ -19,7 +19,7 @@ export async function create(req: Request, res: Response): Promise<void> {
   for (let i = 0; i < usernames.length; i++) {
     const username = usernames[i];
     const email = faker.internet.email();
-    const password = 'qwerty';
+    const password = 'qwertyqwertyqwerty';
     const country = faker.location.country();
     const profilePicture = faker.image.urlPicsumPhotos();
     const checkIfUserExist: IAuthDocument | undefined = await getUserByUsernameOrEmail(username, email);

@@ -4,7 +4,7 @@ import { ClusterHealthResponse, GetResponse } from '@elastic/elasticsearch/lib/a
 import { ISellerGig, WinstonLogger } from '@sidharrrthnix/ms-shared-package';
 import { Logger } from 'winston';
 
-const log: Logger = WinstonLogger(`${config.elasticSearch.url}`, 'gatewayElasticSearchServer', 'debug');
+const log: Logger = WinstonLogger(`${config.elasticSearch.url}`, 'authElasticSearchServer', 'debug');
 
 const elasticSearchClient = new Client({
   node: `${config.elasticSearch.url}`

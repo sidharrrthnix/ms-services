@@ -3,7 +3,7 @@ import { WinstonLogger } from '@sidharrrthnix/ms-shared-package';
 import { Channel, Connection, connect } from 'amqplib';
 import { Logger } from 'winston';
 
-const log: Logger = WinstonLogger(`${config.elasticSearch.url}`, 'notificationQueueConnection', 'debug');
+const log: Logger = WinstonLogger(`${config.elasticSearch.url}`, 'authQueueConnection', 'debug');
 
 let connection: Connection | null = null;
 let channel: Channel | null = null;
@@ -15,7 +15,7 @@ async function createConnection(retries = 5, delay = 5000): Promise<Channel | un
 
       connection = await connect(config.rabbitmq.endpoint);
       channel = await connection.createChannel();
-      log.info('✅ Notification server connected to RabbitMQ queue successfully!');
+      log.info('✅ Auth server connected to RabbitMQ queue successfully!');
 
       connection.on('close', async () => {
         log.warn('RabbitMQ connection closed. Reconnecting...');
