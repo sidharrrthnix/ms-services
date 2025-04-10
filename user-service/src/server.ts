@@ -15,7 +15,12 @@ import http from 'http';
 import { databaseConnection, disconnectDatabase } from './database';
 import { checkConnection } from './elasticsearch';
 import { createConnection } from './queues/connection';
-import { consumeBuyerDirectMessage } from './queues/user.consumer';
+import {
+  consumeBuyerDirectMessage,
+  consumeReviewFanoutMessages,
+  consumeSeedGigDirectMessages,
+  consumeSellerDirectMessage
+} from './queues/user.consumer';
 import { appRoutes } from './routes';
 const SERVER_PORT = 4003;
 
@@ -74,6 +79,9 @@ async function startQueues(): Promise<void> {
   log.info('Starting queues...');
   channel = (await createConnection()) as Channel;
   await consumeBuyerDirectMessage(channel);
+  await consumeSellerDirectMessage(channel);
+  await consumeReviewFanoutMessages(channel);
+  await consumeSeedGigDirectMessages(channel);
 }
 
 function authErrorHandler(app: Application): void {
