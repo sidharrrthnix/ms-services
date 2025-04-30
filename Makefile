@@ -6,7 +6,7 @@ PACKAGE_NAME := @sidharrrthnix/ms-shared-package
 PACKAGE_VERSION := $(shell npm view $(PACKAGE_NAME) version --registry=$(NPM_CONFIG_REGISTRY))
 
 # List all microservices
-MICROSERVICES := auth-service notification-service gateway-service user-service
+MICROSERVICES := auth-service notification-service gateway-service user-service gig-service
 
 # Task to update the package in all microservices
 update-package:

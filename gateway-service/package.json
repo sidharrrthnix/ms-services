@@ -21,7 +21,8 @@
   "dependencies": {
     "@elastic/elasticsearch": "^8.10.0",
     "@faker-js/faker": "^8.2.0",
-    "@sidharrrthnix/ms-shared-package": "^0.0.14",
+    "@sidharrrthnix/ms-shared-package": "^0.0.16",
+    "@socket.io/redis-adapter": "^8.3.0",
     "amqplib": "^0.10.5",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",

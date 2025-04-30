@@ -1,5 +1,5 @@
 {
-  "name": "ms-users",
+  "name": "ms-gigs",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -38,6 +38,7 @@
     "mongoose": "^8.0.0",
     "nodemon": "^3.1.9",
     "pino-pretty": "^10.2.3",
+    "redis": "^4.7.0",
     "typescript": "^5.2.2",
     "typescript-transform-paths": "^3.4.6",
     "uuid": "^9.0.1",

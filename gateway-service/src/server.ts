@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable no-async-promise-executor */
 import http from 'http';
 
 import { CustomError, IErrorResponse, WinstonLogger } from '@sidharrrthnix/ms-shared-package';
+import { createAdapter } from '@socket.io/redis-adapter';
 import { isAxiosError } from 'axios';
 import compression from 'compression';
 import cookieSession from 'cookie-session';
@@ -9,6 +12,7 @@ import { Application, NextFunction, Request, Response, json, urlencoded } from '
 import helmet from 'helmet';
 import hpp from 'hpp';
 import { StatusCodes } from 'http-status-codes';
+import { createClient } from 'redis';
 import { Server } from 'socket.io';
 import { Logger } from 'winston';
 
@@ -17,7 +21,9 @@ import { elasticSearch } from './elasticsearch';
 import { appRoutes } from './routes';
 import { axiosAuthInstance } from './services/api/auth.service';
 import { axiosBuyerInstance } from './services/api/buyer.service';
+import { axiosGigInstance } from './services/api/gig.service';
 import { axiosSellerInstance } from './services/api/seller.service';
+import { SocketIOAppHandler } from './sockets/socket';
 
 export let socketIO: Server;
 
@@ -72,6 +78,7 @@ export class GatewayServer {
         axiosAuthInstance.defaults.headers['Authorization'] = `Bearer ${req.session?.jwt}`;
         axiosBuyerInstance.defaults.headers['Authorization'] = `Bearer ${req.session?.jwt}`;
         axiosSellerInstance.defaults.headers['Authorization'] = `Bearer ${req.session?.jwt}`;
+        axiosGigInstance.defaults.headers['Authorization'] = `Bearer ${req.session?.jwt}`;
       }
       next();
     });
@@ -122,18 +129,13 @@ export class GatewayServer {
   }
 
   private async startServer(app: Application): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       try {
         this.httpServer = http.createServer(app);
         this.log.info(`Process ID ${process.pid} on gateway server has started`);
 
-        socketIO = new Server(this.httpServer, {
-          cors: {
-            origin: config.client.url,
-            methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
-          }
-        });
-
+        const io: Server = await this.createSocketIO(this.httpServer);
+        this.socketIOConnections(io);
         this.httpServer.listen(this.SERVER_PORT, () => {
           this.log.info(`Gateway server running on port ${this.SERVER_PORT}`);
           resolve();
@@ -160,14 +162,37 @@ export class GatewayServer {
     process.on('SIGINT', () => shutdownHandler('SIGINT'));
   }
 
+  private async createSocketIO(httpServer: http.Server): Promise<Server> {
+    const io: Server = new Server(httpServer, {
+      cors: {
+        origin: `${config.client.url}`,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+      }
+    });
+    const pubClient = createClient({ url: config.redis.host });
+    const subClient = pubClient.duplicate();
+    await Promise.all([pubClient.connect(), subClient.connect()]);
+    io.adapter(createAdapter(pubClient, subClient));
+    socketIO = io;
+    return io;
+  }
+
+  private socketIOConnections(io: Server): void {
+    const socketIoApp = new SocketIOAppHandler(io);
+    socketIoApp.listen();
+  }
+
   private async shutdown(): Promise<void> {
     try {
       if (this.httpServer) {
         await new Promise<void>((resolve) => {
           this.log.info('Closing HTTP server...');
-          this.httpServer!.close(() => {
-            this.log.info('HTTP server closed.');
-            resolve();
+          socketIO.close(() => {
+            this.log.info('SocketIO server closed.');
+            this.httpServer!.close(() => {
+              this.log.info('HTTP server closed.');
+              resolve();
+            });
           });
         });
       }

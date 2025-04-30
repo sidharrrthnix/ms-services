@@ -1,5 +1,5 @@
+import { config } from '@gig-service/config';
 import { CustomError, IAuthPayload, IErrorResponse, WinstonLogger } from '@sidharrrthnix/ms-shared-package';
-import { config } from '@user-service/config';
 import { Channel } from 'amqplib';
 import compression from 'compression';
 import cors from 'cors';
@@ -13,19 +13,14 @@ import { Logger } from 'winston';
 import http from 'http';
 
 import { databaseConnection, disconnectDatabase } from './database';
-import { checkConnection } from './elasticsearch';
+import { checkConnection, createIndex } from './elasticsearch';
 import { createConnection } from './queues/connection';
-import {
-  consumeBuyerDirectMessage,
-  consumeReviewFanoutMessages,
-  consumeSeedGigDirectMessages,
-  consumeSellerDirectMessage
-} from './queues/user.consumer';
+import { consumeGigDirectMessage, consumeSeedDirectMessages } from './queues/gigs.consumer';
 import { appRoutes } from './routes';
-const SERVER_PORT = 4003;
+const SERVER_PORT = 4004;
 
-const log: Logger = WinstonLogger(`${config.elasticSearch.url}`, 'UserServer', 'debug');
-export let channel: Channel;
+const log: Logger = WinstonLogger(`${config.elasticSearch.url}`, 'GigServer', 'debug');
+export let gigChannel: Channel;
 
 export async function start(app: Application): Promise<void> {
   await databaseConnection();
@@ -74,14 +69,13 @@ function standardMiddleware(app: Application): void {
 
 function startElasticSearch(): void {
   checkConnection();
+  createIndex('gigs');
 }
 async function startQueues(): Promise<void> {
   log.info('Starting queues...');
-  channel = (await createConnection()) as Channel;
-  await consumeBuyerDirectMessage(channel);
-  await consumeSellerDirectMessage(channel);
-  await consumeReviewFanoutMessages(channel);
-  await consumeSeedGigDirectMessages(channel);
+  gigChannel = await createConnection();
+  await consumeGigDirectMessage(gigChannel);
+  await consumeSeedDirectMessages(gigChannel);
 }
 
 function authErrorHandler(app: Application): void {

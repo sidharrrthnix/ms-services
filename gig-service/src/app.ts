@@ -1,13 +1,14 @@
 import express, { Express } from 'express';
 
-import { redisConnection } from './redis/redis.connection';
-import { GatewayServer } from './server';
+import { databaseConnection } from './database';
+import { redisConnect } from './redis/redis.connection';
+import { start } from './server';
 
 const initialize = async (): Promise<void> => {
   const app: Express = express();
-  const gatewayServer: GatewayServer = new GatewayServer();
-  await gatewayServer.initialize(app);
-  redisConnection.redisConnect();
+  databaseConnection();
+  redisConnect();
+  await start(app);
 };
 
 initialize().catch((error) => {

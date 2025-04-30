@@ -1,0 +1,32 @@
+# 🏗️ Build Stage - Install Dependencies
+FROM node:21-alpine3.18 AS builder
+WORKDIR /app
+
+# Copy package files and authentication for private packages
+COPY .npmrc ./
+COPY package.json package-lock.json ./
+
+# Install all dependencies (dev + prod)
+RUN npm install
+
+# 📌 Runtime Stage - Development Environment
+FROM node:21-alpine3.18
+WORKDIR /app
+
+# Install development tools (curl for debugging)
+RUN apk add --no-cache curl
+
+# Copy .npmrc for private package authentication
+COPY .npmrc ./
+
+# Copy dependencies from builder stage
+COPY --from=builder /app/node_modules ./node_modules
+
+# Copy the entire project (including source code)
+COPY . .
+
+# Expose application port
+EXPOSE 4004
+
+# Start app with hot reloading using nodemon
+CMD ["npm", "run", "dev"]
