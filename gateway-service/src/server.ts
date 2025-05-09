@@ -22,9 +22,9 @@ import { appRoutes } from './routes';
 import { axiosAuthInstance } from './services/api/auth.service';
 import { axiosBuyerInstance } from './services/api/buyer.service';
 import { axiosGigInstance } from './services/api/gig.service';
+import { axiosMessageInstance } from './services/api/message.service';
 import { axiosSellerInstance } from './services/api/seller.service';
 import { SocketIOAppHandler } from './sockets/socket';
-
 export let socketIO: Server;
 
 export class GatewayServer {
@@ -79,6 +79,7 @@ export class GatewayServer {
         axiosBuyerInstance.defaults.headers['Authorization'] = `Bearer ${req.session?.jwt}`;
         axiosSellerInstance.defaults.headers['Authorization'] = `Bearer ${req.session?.jwt}`;
         axiosGigInstance.defaults.headers['Authorization'] = `Bearer ${req.session?.jwt}`;
+        axiosMessageInstance.defaults.headers['Authorization'] = `Bearer ${req.session?.jwt}`;
       }
       next();
     });
